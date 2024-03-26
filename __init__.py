@@ -41,13 +41,6 @@ def extract_minutes(date_string):
         minutes = date_object.minute
         return jsonify({'minutes': minutes})
 
-@app.route('/commits_data')
-def commits_data():
-    # Récupérer les données des commits depuis l'API GitHub
-    response = requests.get('https://api.github.com/repos/Lucas-FB/5MCSI_Metriques/commits')
-    commits_data = response.json()
-    return jsonify(commits_data)
-
 @app.route("/commits/")
 def commits():
     return render_template("commits.html")

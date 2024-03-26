@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Histogramme des commits par minute</title>
+    <title>Courbe des commits par minute</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <h1>Histogramme des commits par minute</h1>
+    <h1>Courbe des commits par minute</h1>
     <div id="chart_div"></div>
 
     <script>
@@ -77,14 +77,12 @@
 
                 // Créer le graphique et l'afficher dans l'élément avec l'ID 'chart_div'
                 var options = {
-                    title: 'Histogramme des commits par minute',
-                    legend: { position: 'none' },
+                    title: 'Courbe des commits par minute',
                     colors: ['blue'],
-                    histogram: { bucketSize: 1 },
                     hAxis: { title: 'Heure' },
                     vAxis: { title: 'Nombre de commits' }
                 };
-                var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
                 chart.draw(data, options);
             });
         }

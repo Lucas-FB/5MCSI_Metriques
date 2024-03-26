@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Weather Data Histogram</title>
+  <title>Histogramme des températures</title>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script type="text/javascript">
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawChart);
 
     function drawChart() {
-      // Récupérer les données météorologiques depuis l'API OpenWeatherMap
-      fetch('https://samples.openweathermap.org/data/2.5/forecast?lat=0&lon=0&appid=xxx')
+      // Récupérer les données météorologiques depuis votre API
+      fetch('/tawarano/') // Mettez ici l'URL de votre endpoint API
         .then(response => response.json())
         .then(data => {
           // Traitement des données pour extraire les températures
-          const temperatures = data.list.map(entry => entry.main.temp);
+          const temperatures = data.results.map(entry => entry.temp);
 
           // Création d'un tableau pour l'histogramme
-          const histogramData = [['Temperature', 'Count']];
+          const histogramData = [['Température', 'Fréquence']];
 
           // Compter les occurrences de chaque température
           const temperatureCounts = {};

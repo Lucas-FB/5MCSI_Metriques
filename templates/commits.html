@@ -77,4 +77,17 @@
                 var options = {
                     title: 'Histogramme des commits par minute',
                     legend: { position: 'none' },
-             
+                    colors: ['blue'],
+                    histogram: { bucketSize: 1 },
+                    hAxis: { title: 'Heure' },
+                    vAxis: { title: 'Nombre de commits' }
+                };
+
+                // Créer le graphique et l'afficher dans l'élément avec l'ID 'chart_div'
+                var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+                chart.draw(data, options);
+            });
+        }
+    </script>
+</body>
+</html>

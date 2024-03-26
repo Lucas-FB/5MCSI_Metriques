@@ -28,26 +28,21 @@
             // Date de départ à 09:00 le 26 mars 2024
             var startDate = new Date('2024-03-26T09:00:00Z');
 
-            // Générer une série de valeurs horaires minute par minute depuis 09:00
-            var hour = startDate.getHours();
-            var minute = startDate.getMinutes();
-            var endTime = new Date(startDate);
-            endTime.setHours(23, 59, 59, 999);
+            // Date de fin à 23:59 le 26 mars 2024
+            var endDate = new Date('2024-03-26T23:59:00Z');
 
-            var currentHour, currentMinute, label;
-            var commitCountByMinute = {};
+            var currentHour = startDate.getHours();
+            var currentMinute = startDate.getMinutes();
+            var currentDate = new Date(startDate);
 
-            while (startDate < endTime) {
-                currentHour = ('0' + hour).slice(-2);
-                currentMinute = ('0' + minute).slice(-2);
-                label = currentHour + ':' + currentMinute;
-
-                // Ajouter l'heure actuelle au tableau de données avec un nombre de commits de 0
+            while (currentDate <= endDate) {
+                var label = ('0' + currentHour).slice(-2) + ':' + ('0' + currentMinute).slice(-2);
                 data.addRow([label, 0]);
 
                 // Incrémenter d'une minute
-                startDate.setMinutes(startDate.getMinutes() + 1);
-                minute = startDate.getMinutes();
+                currentDate.setMinutes(currentDate.getMinutes() + 1);
+                currentHour = currentDate.getHours();
+                currentMinute = currentDate.getMinutes();
             }
 
             // Récupérer les données des commits depuis l'API GitHub
@@ -55,23 +50,16 @@
                 // Compter le nombre de commits pour chaque minute
                 commitsData.forEach(function(commit) {
                     var date = new Date(commit.commit.author.date);
-                    var minutesDifference = Math.floor((date - startDate) / (1000 * 60));
-                    var hour = startDate.getHours();
-                    var minute = startDate.getMinutes() + minutesDifference;
-                    var currentHour = ('0' + hour).slice(-2);
-                    var currentMinute = ('0' + minute).slice(-2);
-                    var label = currentHour + ':' + currentMinute;
-                    if (!commitCountByMinute[label]) {
-                        commitCountByMinute[label] = 0;
-                    }
-                    commitCountByMinute[label]++;
-                });
+                    var commitHour = date.getHours();
+                    var commitMinute = date.getMinutes();
+                    var label = ('0' + commitHour).slice(-2) + ':' + ('0' + commitMinute).slice(-2);
 
-                // Mettre à jour les données avec le nombre de commits pour chaque minute
-                for (var label in commitCountByMinute) {
                     var rowIndex = data.getFilteredRows([{column: 0, value: label}])[0];
-                    data.setCell(rowIndex, 1, commitCountByMinute[label]);
-                }
+                    if (rowIndex !== undefined) {
+                        var count = data.getValue(rowIndex, 1);
+                        data.setValue(rowIndex, 1, count + 1);
+                    }
+                });
 
                 // Options du graphique
                 var options = {

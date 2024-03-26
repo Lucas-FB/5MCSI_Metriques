@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Histogramme des commits</title>
+    <title>Histogramme des commits par minute</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         #chart_div {
             width: 900px;
-            height: 800px;
+            height: 500px;
             margin: 0 auto;
         }
     </style>
@@ -25,8 +25,7 @@
             data.addColumn('string', 'Heure');
             data.addColumn('number', 'Nombre de commits');
 
-
-            // Date de départ à 9h00 le 26 mars 2024
+            // Date de départ à 09:00 le 26 mars 2024
             var startDate = new Date('2024-03-26T09:00:00Z');
 
             // Récupérer les données des commits depuis l'API GitHub
@@ -37,18 +36,18 @@
                 commitsData.forEach(function(commit) {
                     var date = new Date(commit.commit.author.date);
                     var minutesDifference = Math.floor((date - startDate) / (1000 * 60));
-                    if (!commitCountByMinute[minutesDifference]) {
-                        commitCountByMinute[minutesDifference] = 0;
+                    var hour = Math.floor(minutesDifference / 60);
+                    var minuteOfDay = minutesDifference % 60;
+                    var label = ('0' + hour).slice(-2) + ':' + ('0' + minuteOfDay).slice(-2);
+                    if (!commitCountByMinute[label]) {
+                        commitCountByMinute[label] = 0;
                     }
-                    commitCountByMinute[minutesDifference]++;
+                    commitCountByMinute[label]++;
                 });
 
                 // Ajouter les données au tableau de données de Google Charts
-                for (var minute in commitCountByMinute) {
-                    var hour = Math.floor(minute / 60);
-                    var minuteOfDay = minute % 60;
-                    var label = ('0' + hour).slice(-2) + ':' + ('0' + minuteOfDay).slice(-2);
-                    data.addRow([commitCountByMinute[minute], label]);
+                for (var label in commitCountByMinute) {
+                    data.addRow([label, commitCountByMinute[label]]);
                 }
 
                 // Options du graphique
@@ -57,8 +56,8 @@
                     legend: { position: 'none' },
                     colors: ['blue'],
                     histogram: { bucketSize: 1 },
-                    vAxis: { title: 'Nombre de commits' },
-                    hAxis: { title: 'Heure' }
+                    hAxis: { title: 'Heure' },
+                    vAxis: { title: 'Nombre de commits' }
                 };
 
                 // Créer le graphique et l'afficher dans l'élément avec l'ID 'chart_div'

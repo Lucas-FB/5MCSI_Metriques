@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 owner = 'Lucas-FB'
 repo = '5MCSI_Metriques'
-token = '${{ secrets.TOKEN }}'
+token = os.environ.get('PERSONAL_ACCESS_TOKEN')
 
 @app.route('/')
 def hello_world():

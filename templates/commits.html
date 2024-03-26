@@ -22,8 +22,9 @@
 
         function drawChart() {
             var data = new google.visualization.DataTable();
-            data.addColumn('number', 'Nombre de commits');
             data.addColumn('string', 'Heure');
+            data.addColumn('number', 'Nombre de commits');
+
 
             // Date de départ à 9h00 le 26 mars 2024
             var startDate = new Date('2024-03-26T09:00:00Z');

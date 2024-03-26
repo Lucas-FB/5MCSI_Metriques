@@ -1,91 +1,96 @@
-<!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Courbe des commits par minute</title>
+    <meta charset="UTF-8">
+    <title>Commits</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        #chart_div {
-            width: 900px;
-            height: 500px;
-            margin: 0 auto;
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
-    <h1>Courbe des commits par minute</h1>
-    <div id="chart_div"></div>
+    <h1>Informations sur les commits</h1>
+    <table id="commit-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Minute</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les lignes seront ajoutées ici par jQuery -->
+        </tbody>
+    </table>
+    <canvas id="commitsChart"></canvas>
 
     <script>
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(drawChart);
+        $(document).ready(function() {
+            const baseUrl = 'https://api.github.com/repos/Lucas-FB/5MCSI_Metriques/commits';
+            let commitCountPerMinute = {};
 
-        function drawChart() {
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Heure');
-            data.addColumn('number', 'Nombre de commits');
+            $.getJSON(baseUrl, function(data) {
+                data.forEach(function(commit) {
+                    const fullDate = commit.commit.author.date; // "2023-04-05T14:30:00Z"
+                    const date = fullDate.split('T')[0]; // Date sans l'heure
+                    const time = fullDate.split('T')[1].substring(0, 5); // Heure et minute
+                    const minuteKey = date + ' ' + time; // Clé unique par minute
 
-            // Date de départ à 09:00 le 26 mars 2024
-            var startDate = new Date('2024-03-26T09:00:00Z');
-
-            // Générer une série de valeurs horaires minute par minute depuis 09:00
-            var hour = startDate.getHours();
-            var minute = startDate.getMinutes();
-            var endTime = new Date(startDate);
-            endTime.setHours(23, 59, 59, 999);
-
-            var currentHour, currentMinute, label;
-            var commitCountByMinute = {};
-
-            while (startDate < endTime) {
-                currentHour = ('0' + hour).slice(-2);
-                currentMinute = ('0' + minute).slice(-2);
-                label = currentHour + ':' + currentMinute;
-
-                // Ajouter l'heure actuelle au tableau de données avec un nombre de commits de 0
-                data.addRow([label, 0]);
-
-                // Incrémenter d'une minute
-                startDate.setMinutes(startDate.getMinutes() + 1);
-                minute = startDate.getMinutes();
-            }
-
-            // Récupérer les données des commits depuis l'API GitHub
-            $.getJSON('https://api.github.com/repos/Lucas-FB/5MCSI_Metriques/commits', function(commitsData) {
-                // Compter le nombre de commits pour chaque minute
-                commitsData.forEach(function(commit) {
-                    var date = new Date(commit.commit.author.date);
-                    var minutesDifference = Math.floor((date - startDate) / (1000 * 60));
-                    var hour = startDate.getHours();
-                    var minute = startDate.getMinutes() + minutesDifference;
-                    var currentHour = ('0' + hour).slice(-2);
-                    var currentMinute = ('0' + minute).slice(-2);
-                    var label = currentHour + ':' + currentMinute;
-                    if (!commitCountByMinute[label]) {
-                        commitCountByMinute[label] = 0;
+                    // Incrémenter le compteur pour chaque minute
+                    if (!commitCountPerMinute[minuteKey]) {
+                        commitCountPerMinute[minuteKey] = 1;
+                    } else {
+                        commitCountPerMinute[minuteKey]++;
                     }
-                    commitCountByMinute[label]++;
+
+                    // Afficher chaque commit dans le tableau HTML
+                    $('#commit-table tbody').append(`
+                        <tr>
+                            <td>${date}</td>
+                            <td>${time}</td>
+                        </tr>
+                    `);
                 });
 
-                // Mettre à jour les données avec le nombre de commits pour chaque minute
-                for (var label in commitCountByMinute) {
-                    var rowIndex = data.getFilteredRows([{column: 0, value: label}])[0];
-                    if (rowIndex !== undefined) {
-                        data.setCell(rowIndex, 1, commitCountByMinute[label]);
-                    }
-                }
+                const sortedMinutes = Object.keys(commitCountPerMinute).sort();
+                const commitCounts = sortedMinutes.map(minute => commitCountPerMinute[minute]);
 
-                // Créer le graphique et l'afficher dans l'élément avec l'ID 'chart_div'
-                var options = {
-                    title: 'Courbe des commits par minute',
-                    colors: ['blue'],
-                    hAxis: { title: 'Heure' },
-                    vAxis: { title: 'Nombre de commits' }
-                };
-                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-                chart.draw(data, options);
+                const ctx = document.getElementById('commitsChart').getContext('2d');
+                const commitsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: sortedMinutes, // Minutes uniques en tant que labels
+                        datasets: [{
+                            label: 'Commits par minute',
+                            data: commitCounts, // Nombre de commits par minute
+                            backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                            borderColor: 'rgba(0, 0, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
             });
-        }
+        });
     </script>
 </body>
 </html>

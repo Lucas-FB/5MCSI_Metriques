@@ -1,43 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Commits</title>
+    <title>Histogramme des commits</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
+        #chart_div {
+            width: 900px;
+            height: 800px;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
-    <h1>Informations sur les commits</h1>
-    <table id="commit-table">
-        <tr>
-            <th>Date</th>
-            <th>Minute</th>
-        </tr>
-    </table>
+    <h1>Histogramme des commits par minute</h1>
+    <div id="chart_div"></div>
 
     <script>
-        $(document).ready(function() {
-            $.getJSON('https://api.github.com/repos/Lucas-FB/5MCSI_Metriques/commits', function(data) {
-                data.forEach(function(commit) {
-                    var date = commit.commit.author.date;
-                    $.getJSON('/extract-minutes/' + date, function(minutesData) {
-                        $('#commit-table').append('<tr><td>' + date + '</td><td>' + minutesData.minutes + '</td></tr>');
-                    });
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Minute');
+            data.addColumn('number', 'Nombre de commits');
+
+            // Récupérer les données des commits depuis l'API GitHub
+            $.getJSON('https://api.github.com/repos/Lucas-FB/5MCSI_Metriques/commits', function(commitsData) {
+                var commitCountByMinute = {};
+
+                // Parcourir les données des commits et compter les commits par minute
+                commitsData.forEach(function(commit) {
+                    var date = new Date(commit.commit.author.date);
+                    var minute = date.getMinutes();
+                    if (!commitCountByMinute[minute]) {
+                        commitCountByMinute[minute] = 0;
+                    }
+                    commitCountByMinute[minute]++;
                 });
+
+                // Ajouter les données au tableau de données de Google Charts
+                for (var minute in commitCountByMinute) {
+                    data.addRow([minute.toString(), commitCountByMinute[minute]]);
+                }
+
+                // Options du graphique
+                var options = {
+                    title: 'Histogramme des commits par minute',
+                    legend: { position: 'none' },
+                    colors: ['blue'],
+                    histogram: { bucketSize: 1 }
+                };
+
+                // Créer le graphique et l'afficher dans l'élément avec l'ID 'chart_div'
+                var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+                chart.draw(data, options);
             });
-        });
+        }
     </script>
 </body>
 </html>

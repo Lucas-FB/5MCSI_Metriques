@@ -9,7 +9,7 @@
 
     function drawChart() {
       // Récupérer les données météorologiques depuis l'API OpenWeatherMap
-      fetch('https://api.openweathermap.org/data/2.5/forecast?lat=0&lon=0&appid=YOUR_API_KEY')
+      fetch('https://samples.openweathermap.org/data/2.5/forecast?lat=0&lon=0&appid=xxx')
         .then(response => response.json())
         .then(data => {
           // Traitement des données pour extraire les températures

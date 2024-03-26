@@ -22,8 +22,8 @@
 
         function drawChart() {
             var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Heure');
             data.addColumn('number', 'Nombre de commits');
+            data.addColumn('string', 'Heure');
 
             // Date de départ à 9h00 le 26 mars 2024
             var startDate = new Date('2024-03-26T09:00:00Z');
@@ -47,7 +47,7 @@
                     var hour = Math.floor(minute / 60);
                     var minuteOfDay = minute % 60;
                     var label = ('0' + hour).slice(-2) + ':' + ('0' + minuteOfDay).slice(-2);
-                    data.addRow([label, commitCountByMinute[minute]]);
+                    data.addRow([commitCountByMinute[minute], label]);
                 }
 
                 // Options du graphique
@@ -55,7 +55,9 @@
                     title: 'Histogramme des commits par minute',
                     legend: { position: 'none' },
                     colors: ['blue'],
-                    histogram: { bucketSize: 1 }
+                    histogram: { bucketSize: 1 },
+                    hAxis: { title: 'Nombre de commits' },
+                    vAxis: { title: 'Heure' }
                 };
 
                 // Créer le graphique et l'afficher dans l'élément avec l'ID 'chart_div'

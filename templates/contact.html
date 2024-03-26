@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      height: 150px;
+    }
+
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    .message {
+      color: #4CAF50;
+      margin-top: 10px;
+    }
+
+    .error {
+      color: #f44336;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Contactez-nous</h1>
+  <form id="contactForm" action="#" method="post">
+    <label for="name">Nom :</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">Email :</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="subject">Sujet :</label>
+    <input type="text" id="subject" name="subject">
+
+    <label for="message">Message :</label>
+    <textarea id="message" name="message" required></textarea>
+
+    <input type="submit" value="Envoyer">
+  </form>
+
+  <div id="response" class="message" style="display: none;"></div>
+</div>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var formData = new FormData(this);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'process.php', true);
+    xhr.onload = function() {
+      document.getElementById('response').style.display = 'block';
+      if (xhr.status === 200) {
+        document.getElementById('response').className = 'message';
+        document.getElementById('response').innerHTML = xhr.responseText;
+        document.getElementById('contactForm').reset();
+      } else {
+        document.getElementById('response').className = 'error';
+        document.getElementById('response').innerHTML = 'Une erreur est survenue, veuillez réessayer.';
+      }
+    };
+    xhr.send(formData);
+  });
+</script>
+
+</body>
+</html>
